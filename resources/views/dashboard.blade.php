@@ -1,42 +1,74 @@
 @extends('layouts.app')
 
-@section('content')
-<div class="container">
-    <h3 class="mb-4">Dashboard Admin</h3>
+@section('title', 'Dashboard')
 
-    <div class="row g-4">
-        <div class="col-md-3">
-            <div class="card text-bg-primary shadow-sm">
+@section('content')
+    <h4 class="mb-3">Dashboard Akademik</h4>
+
+    {{-- Statistik Umum --}}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-bg-primary mb-3">
                 <div class="card-body">
-                    <h5 class="card-title">Jumlah Siswa</h5>
+                    <h5 class="card-title">Total Siswa</h5>
                     <p class="display-6">{{ $studentCount }}</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-bg-success shadow-sm">
+        <div class="col-md-4">
+            <div class="card text-bg-success mb-3">
                 <div class="card-body">
-                    <h5 class="card-title">Mata Pelajaran</h5>
+                    <h5 class="card-title">Total Kelas</h5>
+                    <p class="display-6">{{ $classroomCount }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Mapel</h5>
                     <p class="display-6">{{ $subjectCount }}</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-bg-warning shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Total Nilai</h5>
-                    <p class="display-6">{{ $scoreCount }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-bg-info shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">Prestasi Siswa</h5>
-                    <p class="display-6">{{ $achievementCount }}</p>
-                </div>
-            </div>
-        </div>
     </div>
-</div>
+
+    {{-- Siswa dengan Nilai Tertinggi --}}
+    <div class="mb-4">
+        <h5 class="mb-3">Siswa dengan Nilai Tertinggi (Rata-rata)</h5>
+        <ul class="list-group">
+            @foreach ($averageScores as $item)
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>{{ $item->student->name }}</span>
+                    <span><strong>{{ number_format($item->avg_score, 2) }}</strong></span>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+
+    {{-- Siswa dengan Absensi Terbaik --}}
+    <div class="mb-4">
+        <h5 class="mb-3">Siswa dengan Kehadiran Terbanyak</h5>
+        <ul class="list-group">
+            @foreach ($topAttendance as $item)
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>{{ $item->student->name ?? 'N/A' }}</span>
+                    <span><strong>{{ $item->hadir_count }} Hari</strong></span>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+
+    {{-- Siswa Berprestasi --}}
+    <div class="mb-4">
+        <h5 class="mb-3">Siswa dengan Prestasi Terbanyak</h5>
+        <ul class="list-group">
+            @foreach ($topAchievements as $item)
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>{{ $item->student->name ?? 'N/A' }}</span>
+                    <span><strong>{{ $item->count }} Prestasi</strong></span>
+                </li>
+            @endforeach
+        </ul>
+    </div>
 @endsection

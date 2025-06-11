@@ -28,7 +28,7 @@
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
+        <div class="container g-5">
             <a class="navbar-brand" href="{{ route('dashboard') }}">Monitoring Akademik</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
                 <span class="navbar-toggler-icon"></span>
@@ -55,12 +55,12 @@
         </div>
     </nav>
 
-    <main class="container py-4">
+    <main class="container g-5 py-4">
         @yield('content')
     </main>
 
     <footer class="text-center">
-        <div class="container">
+        <div class="container g-5">
             <small>© {{ date('Y') }} Sistem Monitoring Akademik Siswa</small>
         </div>
     </footer>
