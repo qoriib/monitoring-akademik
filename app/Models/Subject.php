@@ -15,4 +15,9 @@ class Subject extends Model
     {
         return $this->hasMany(Score::class);
     }
+
+    public function classrooms()
+    {
+        return $this->belongsToMany(Classroom::class);
+    }
 }

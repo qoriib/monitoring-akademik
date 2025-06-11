@@ -12,7 +12,7 @@ class StudentController extends Controller
      */
     public function index()
     {
-        $students = Student::latest()->paginate(10);
+        $students = Student::with('classrooms')->latest()->paginate(10);
         return view('students.index', compact('students'));
     }
 
@@ -32,7 +32,6 @@ class StudentController extends Controller
         $request->validate([
             'nisn' => 'required|unique:students',
             'name' => 'required',
-            'class' => 'required',
         ]);
 
         Student::create($request->all());
@@ -56,7 +55,6 @@ class StudentController extends Controller
         $request->validate([
             'nisn' => 'required|unique:students,nisn,' . $student->id,
             'name' => 'required',
-            'class' => 'required',
         ]);
 
         $student->update($request->all());

@@ -25,4 +25,9 @@ class Student extends Model
     {
         return $this->hasMany(Achievement::class);
     }
+
+    public function classrooms()
+    {
+        return $this->belongsToMany(Classroom::class);
+    }
 }

@@ -5,6 +5,7 @@ use App\Http\Controllers\AttendanceController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
@@ -26,6 +27,7 @@ Route::middleware('auth')->group(function () {
             'achievementCount' => Achievement::count(),
         ]);
     })->name('dashboard');
+    Route::resource('classrooms', ClassroomController::class);
     Route::resource('students', StudentController::class);
     Route::resource('scores', ScoreController::class);
     Route::resource('subjects', SubjectController::class);

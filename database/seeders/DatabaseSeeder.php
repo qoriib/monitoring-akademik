@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             ScoreSeeder::class,
             AttendanceSeeder::class,
             AchievementSeeder::class,
+            ClassroomSeeder::class,
         ]);
     }
 }

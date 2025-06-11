@@ -37,6 +37,7 @@
             <div class="collapse navbar-collapse" id="navMain">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a href="{{ route('students.index') }}" class="nav-link">Siswa</a></li>
+                    <li class="nav-item"><a href="{{ route('classrooms.index') }}" class="nav-link">Kelas</a></li>
                     <li class="nav-item"><a href="{{ route('subjects.index') }}" class="nav-link">Mata Pelajaran</a></li>
                     <li class="nav-item"><a href="{{ route('scores.index') }}" class="nav-link">Nilai</a></li>
                     <li class="nav-item"><a href="{{ route('attendances.index') }}" class="nav-link">Absensi</a></li>
