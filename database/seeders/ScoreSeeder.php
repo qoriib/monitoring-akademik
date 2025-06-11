@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Classroom;
 use App\Models\Score;
-use App\Models\Student;
-use App\Models\Subject;
 use Illuminate\Database\Seeder;
 
 class ScoreSeeder extends Seeder
@@ -14,17 +13,23 @@ class ScoreSeeder extends Seeder
      */
     public function run(): void
     {
-        $students = Student::all();
-        $subjects = Subject::all();
+        // Loop semua kelas
+        foreach (Classroom::with(['students', 'subjects'])->get() as $classroom) {
+            $students = $classroom->students;
+            $subjects = $classroom->subjects;
 
-        foreach ($students as $student) {
-            foreach ($subjects as $subject) {
-                Score::create([
-                    'student_id' => $student->id,
-                    'subject_id' => $subject->id,
-                    'semester' => 'Ganjil 2024/2025',
-                    'score' => rand(60, 100),
-                ]);
+            // Untuk setiap siswa di kelas itu
+            foreach ($students as $student) {
+                // Untuk setiap mata pelajaran di kelas itu
+                foreach ($subjects as $subject) {
+                    // Buat nilai acak antara 60 dan 100
+                    Score::create([
+                        'student_id' => $student->id,
+                        'subject_id' => $subject->id,
+                        'classroom_id' => $classroom->id,
+                        'score' => rand(60, 100) + rand(0, 99) / 100, // nilai decimal 2 digit
+                    ]);
+                }
             }
         }
     }

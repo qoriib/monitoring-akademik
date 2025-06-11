@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             StudentSeeder::class,
             SubjectSeeder::class,
+            ClassroomSeeder::class,
             ScoreSeeder::class,
             AttendanceSeeder::class,
             AchievementSeeder::class,
-            ClassroomSeeder::class,
         ]);
     }
 }

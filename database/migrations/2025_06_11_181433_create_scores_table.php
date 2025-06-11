@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('scores', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained()->onDelete('cascade');
-            $table->foreignId('subject_id')->constrained()->onDelete('cascade');
-            $table->string('semester');
+            $table->foreignId('student_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('classroom_id')->constrained()->cascadeOnDelete();
             $table->decimal('score', 5, 2);
             $table->timestamps();
         });

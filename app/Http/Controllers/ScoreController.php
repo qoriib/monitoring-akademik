@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Classroom;
 use App\Models\Score;
-use App\Models\Student;
-use App\Models\Subject;
 use Illuminate\Http\Request;
 
 class ScoreController extends Controller
@@ -12,20 +11,23 @@ class ScoreController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $scores = Score::with('student', 'subject')->latest()->paginate(10);
-        return view('scores.index', compact('scores'));
-    }
+        $classrooms = Classroom::with(['students', 'subjects'])->get();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        $students = Student::all();
-        $subjects = Subject::all();
-        return view('scores.create', compact('students', 'subjects'));
+        $selectedClassroom = null;
+        $students = [];
+        $subjects = [];
+
+        if ($request->has('classroom_id') && $request->classroom_id) {
+            $selectedClassroom = Classroom::with(['students', 'subjects'])
+                ->findOrFail($request->classroom_id);
+
+            $students = $selectedClassroom->students;
+            $subjects = $selectedClassroom->subjects;
+        }
+
+        return view('scores.index', compact('classrooms', 'selectedClassroom', 'students', 'subjects'));
     }
 
     /**
@@ -34,50 +36,26 @@ class ScoreController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'subject_id' => 'required|exists:subjects,id',
-            'semester' => 'required|string',
-            'score' => 'required|numeric|min:0|max:100',
+            'classroom_id' => 'required|exists:classrooms,id',
+            'scores' => 'array',
         ]);
 
-        Score::create($request->all());
+        foreach ($request->scores as $studentId => $subjectScores) {
+            foreach ($subjectScores as $subjectId => $scoreValue) {
+                if ($scoreValue !== null && $scoreValue !== '') {
+                    Score::updateOrCreate(
+                        [
+                            'student_id' => $studentId,
+                            'subject_id' => $subjectId,
+                            'classroom_id' => $request->classroom_id,
+                        ],
+                        ['score' => $scoreValue]
+                    );
+                }
+            }
+        }
 
-        return redirect()->route('scores.index')->with('success', 'Nilai berhasil ditambahkan.');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Score $score)
-    {
-        $students = Student::all();
-        $subjects = Subject::all();
-        return view('scores.edit', compact('score', 'students', 'subjects'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Score $score)
-    {
-        $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'subject_id' => 'required|exists:subjects,id',
-            'semester' => 'required|string',
-            'score' => 'required|numeric|min:0|max:100',
-        ]);
-
-        $score->update($request->all());
-
-        return redirect()->route('scores.index')->with('success', 'Nilai berhasil diperbarui.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Score $score)
-    {
-        $score->delete();
-        return redirect()->route('scores.index')->with('success', 'Nilai berhasil dihapus.');
+        return redirect()->route('scores.index', ['classroom_id' => $request->classroom_id])
+            ->with('success', 'Nilai berhasil disimpan.');
     }
 }

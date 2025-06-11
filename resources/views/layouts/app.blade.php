@@ -37,8 +37,8 @@
             <div class="collapse navbar-collapse" id="navMain">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a href="{{ route('students.index') }}" class="nav-link">Siswa</a></li>
+                    <li class="nav-item"><a href="{{ route('subjects.index') }}" class="nav-link">Mapel</a></li>
                     <li class="nav-item"><a href="{{ route('classrooms.index') }}" class="nav-link">Kelas</a></li>
-                    <li class="nav-item"><a href="{{ route('subjects.index') }}" class="nav-link">Mata Pelajaran</a></li>
                     <li class="nav-item"><a href="{{ route('scores.index') }}" class="nav-link">Nilai</a></li>
                     <li class="nav-item"><a href="{{ route('attendances.index') }}" class="nav-link">Absensi</a></li>
                     <li class="nav-item"><a href="{{ route('achievements.index') }}" class="nav-link">Prestasi</a></li>
@@ -66,5 +66,6 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js" integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    @stack('scripts')
 </body>
 </html>

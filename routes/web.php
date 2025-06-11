@@ -27,10 +27,18 @@ Route::middleware('auth')->group(function () {
             'achievementCount' => Achievement::count(),
         ]);
     })->name('dashboard');
-    Route::resource('classrooms', ClassroomController::class);
+
     Route::resource('students', StudentController::class);
-    Route::resource('scores', ScoreController::class);
     Route::resource('subjects', SubjectController::class);
-    Route::resource('attendances', AttendanceController::class);
     Route::resource('achievements', AchievementController::class);
+
+    Route::resource('classrooms', ClassroomController::class);
+    Route::post('classrooms/{classroom}/students', [ClassroomController::class, 'updateStudents'])->name('classrooms.students.update');
+    Route::post('classrooms/{classroom}/subjects', [ClassroomController::class, 'updateSubjects'])->name('classrooms.subjects.update');
+
+    Route::get('/scores', [ScoreController::class, 'index'])->name('scores.index');
+    Route::post('/scores', [ScoreController::class, 'store'])->name('scores.store');
+
+    Route::get('/attendances', [AttendanceController::class, 'index'])->name('attendances.index');
+    Route::post('/attendances', [AttendanceController::class, 'store'])->name('attendances.store');
 });
