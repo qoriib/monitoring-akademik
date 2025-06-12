@@ -11,7 +11,7 @@
             <div class="card text-bg-primary mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Total Siswa</h5>
-                    <p class="display-6">{{ $studentCount }}</p>
+                    <p class="display-6 mb-0">{{ $studentCount }}</p>
                 </div>
             </div>
         </div>
@@ -19,7 +19,7 @@
             <div class="card text-bg-success mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Total Kelas</h5>
-                    <p class="display-6">{{ $classroomCount }}</p>
+                    <p class="display-6 mb-0">{{ $classroomCount }}</p>
                 </div>
             </div>
         </div>
@@ -27,7 +27,7 @@
             <div class="card text-bg-warning mb-3">
                 <div class="card-body">
                     <h5 class="card-title">Total Mapel</h5>
-                    <p class="display-6">{{ $subjectCount }}</p>
+                    <p class="display-6 mb-0">{{ $subjectCount }}</p>
                 </div>
             </div>
         </div>
