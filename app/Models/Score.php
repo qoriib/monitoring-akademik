@@ -9,7 +9,7 @@ class Score extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['student_id', 'subject_id', 'semester', 'score'];
+    protected $fillable = ['student_id', 'subject_id', 'classroom_id', 'semester', 'score'];
 
     public function student()
     {

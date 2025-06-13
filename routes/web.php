@@ -12,7 +12,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'loginForm'])->name('login');
+    Route::get('/', [AuthController::class, 'loginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.handle');
 });
 
@@ -24,8 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('achievements', AchievementController::class);
 
     Route::resource('classrooms', ClassroomController::class);
-    Route::post('classrooms/{classroom}/students', [ClassroomController::class, 'updateStudents'])->name('classrooms.students.update');
-    Route::post('classrooms/{classroom}/subjects', [ClassroomController::class, 'updateSubjects'])->name('classrooms.subjects.update');
+    Route::post('/classrooms/{classroom}/students', [ClassroomController::class, 'updateStudents'])->name('classrooms.students.update');
+    Route::post('/classrooms/{classroom}/subjects', [ClassroomController::class, 'updateSubjects'])->name('classrooms.subjects.update');
 
     Route::get('/scores', [ScoreController::class, 'index'])->name('scores.index');
     Route::post('/scores', [ScoreController::class, 'store'])->name('scores.store');

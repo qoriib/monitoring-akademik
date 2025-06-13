@@ -3,8 +3,10 @@
 @section('title', 'Login')
 
 @section('content')
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+    @if($errors->has('email'))
+        <div class="alert alert-danger">
+            {{ $errors->first('email') }}
+        </div>
     @endif
 
     <form method="POST" action="{{ route('login.handle') }}">
