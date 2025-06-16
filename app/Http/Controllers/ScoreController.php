@@ -13,21 +13,36 @@ class ScoreController extends Controller
      */
     public function index(Request $request)
     {
-        $classrooms = Classroom::with(['students', 'subjects'])->get();
+        $classrooms = Classroom::orderByDesc('academic_year')->orderBy('name')->get();
+
+        // Default semester Ganjil jika tidak ada input
+        $semester = $request->semester ?? 'Ganjil';
 
         $selectedClassroom = null;
         $students = [];
         $subjects = [];
 
-        if ($request->has('classroom_id') && $request->classroom_id) {
-            $selectedClassroom = Classroom::with(['students', 'subjects'])
+        // Jika classroom_id dikirim atau ada classroom default
+        if ($request->filled('classroom_id')) {
+            $selectedClassroom = Classroom::with(['students.scores', 'subjects'])
                 ->findOrFail($request->classroom_id);
+        } elseif ($classrooms->isNotEmpty()) {
+            $selectedClassroom = Classroom::with(['students.scores', 'subjects'])
+                ->first();
+        }
 
+        if ($selectedClassroom) {
             $students = $selectedClassroom->students;
             $subjects = $selectedClassroom->subjects;
         }
 
-        return view('scores.index', compact('classrooms', 'selectedClassroom', 'students', 'subjects'));
+        return view('scores.index', compact(
+            'classrooms',
+            'selectedClassroom',
+            'students',
+            'subjects',
+            'semester'
+        ));
     }
 
     /**

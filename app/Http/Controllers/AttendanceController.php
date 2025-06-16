@@ -4,54 +4,75 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Classroom;
-use App\Models\Student;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Tampilkan form absensi bulanan.
      */
     public function index(Request $request)
     {
-        $classrooms = Classroom::with('students')->get();
+        $semester = $request->semester ?? 'Ganjil';
+
+        $classrooms = \App\Models\Classroom::when($semester, fn($q) => $q->where('semester', $semester))
+            ->with('students')->get();
+
+        $classroomId = $request->classroom_id ?? $classrooms->first()?->id;
+
+        $month = $request->month ?? now()->format('Y-m');
 
         $selectedClassroom = null;
         $students = [];
 
-        if ($request->has(['classroom_id', 'date']) && $request->filled(['classroom_id', 'date'])) {
-            $selectedClassroom = Classroom::with('students')->findOrFail($request->classroom_id);
-            $students = $selectedClassroom->students;
+        if ($classroomId) {
+            $selectedClassroom = $classrooms->where('id', $classroomId)->first();
+            $students = $selectedClassroom?->students ?? [];
         }
 
-        return view('attendances.index', compact('classrooms', 'selectedClassroom', 'students'));
+        return view('attendances.index', compact(
+            'classrooms',
+            'selectedClassroom',
+            'students',
+            'semester',
+            'month'
+        ));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Simpan absensi bulanan.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'date' => 'required|date',
+            'classroom_id' => 'required|exists:classrooms,id',
+            'month' => 'required|date_format:Y-m',
             'attendances' => 'required|array',
         ]);
 
-        foreach ($request->attendances as $studentId => $status) {
-            Attendance::updateOrCreate(
-                [
-                    'student_id' => $studentId,
-                    'date' => $request->date,
-                ],
-                [
-                    'status' => $status,
-                ]
-            );
+        foreach ($request->attendances as $studentId => $dates) {
+            foreach ($dates as $date => $status) {
+                if (!empty($status)) {
+                    Attendance::updateOrCreate(
+                        [
+                            'student_id' => $studentId,
+                            'date' => $date,
+                        ],
+                        [
+                            'status' => $status,
+                        ]
+                    );
+                }
+            }
         }
 
+        // Ambil semester dari kelas (agar tetap konsisten setelah submit)
+        $semester = Classroom::find($request->classroom_id)?->semester ?? 'Ganjil';
+
         return redirect()->route('attendances.index', [
+            'semester' => $semester,
             'classroom_id' => $request->classroom_id,
-            'date' => $request->date,
+            'month' => $request->month,
         ])->with('success', 'Absensi berhasil disimpan.');
     }
 }

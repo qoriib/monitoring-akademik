@@ -14,16 +14,21 @@ class AchievementSeeder extends Seeder
     public function run(): void
     {
         $levels = ['Lokal', 'Kota', 'Provinsi', 'Nasional'];
-        $students = Student::take(5)->get(); // hanya 5 siswa yang punya prestasi
+        $students = Student::has('classrooms')->take(5)->get(); // pastikan siswa punya kelas
 
         foreach ($students as $student) {
-            Achievement::create([
-                'student_id' => $student->id,
-                'title' => 'Juara ' . rand(1, 3) . ' Olimpiade',
-                'description' => 'Prestasi dalam bidang akademik',
-                'level' => $levels[array_rand($levels)],
-                'date' => now()->subMonths(rand(1, 6)),
-            ]);
+            $classroomId = $student->classrooms()->inRandomOrder()->first()?->id;
+
+            if ($classroomId) {
+                Achievement::create([
+                    'student_id' => $student->id,
+                    'classroom_id' => $classroomId,
+                    'title' => 'Juara ' . rand(1, 3) . ' Olimpiade',
+                    'description' => 'Prestasi dalam bidang akademik',
+                    'level' => $levels[array_rand($levels)],
+                    'date' => now()->subMonths(rand(1, 6)),
+                ]);
+            }
         }
     }
 }

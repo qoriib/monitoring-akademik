@@ -27,7 +27,7 @@ class ScoreSeeder extends Seeder
                         'student_id' => $student->id,
                         'subject_id' => $subject->id,
                         'classroom_id' => $classroom->id,
-                        'score' => rand(60, 100) + rand(0, 99) / 100, // nilai decimal 2 digit
+                        'score' => rand(60, 90) + rand(0, 89) / 100, // nilai decimal 2 digit
                     ]);
                 }
             }

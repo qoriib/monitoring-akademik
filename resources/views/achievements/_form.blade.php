@@ -13,8 +13,21 @@
 </div>
 
 <div class="mb-3">
+    <label class="form-label">Kelas</label>
+    <select name="classroom_id" class="form-select" required>
+        <option value="">-- Pilih Kelas --</option>
+        @foreach ($classrooms as $classroom)
+            <option value="{{ $classroom->id }}" @selected(old('classroom_id', $achievement->classroom_id ?? '') == $classroom->id)>
+                {{ $classroom->name }} ({{ $classroom->academic_year }} - {{ $classroom->semester }})
+            </option>
+        @endforeach
+    </select>
+</div>
+
+<div class="mb-3">
     <label class="form-label">Judul Prestasi</label>
-    <input type="text" name="title" class="form-control" value="{{ old('title', $achievement->title ?? '') }}" required>
+    <input type="text" name="title" class="form-control"
+        value="{{ old('title', $achievement->title ?? '') }}" required>
 </div>
 
 <div class="mb-3">
@@ -35,7 +48,8 @@
 
 <div class="mb-3">
     <label class="form-label">Tanggal</label>
-    <input type="date" name="date" class="form-control" value="{{ old('date', $achievement->date ?? '') }}" required>
+    <input type="date" name="date" class="form-control"
+        value="{{ old('date', $achievement->date ?? '') }}" required>
 </div>
 
 <button type="submit" class="btn btn-success">{{ $submit ?? 'Simpan' }}</button>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Achievement;
+use App\Models\Classroom;
 use App\Models\Student;
 use Illuminate\Http\Request;
 
@@ -11,10 +12,38 @@ class AchievementController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $achievements = Achievement::with('student')->latest('date')->paginate(10);
-        return view('achievements.index', compact('achievements'));
+        $query = Achievement::with('student', 'classroom');
+
+        // Filter data prestasi berdasarkan semester
+        if ($request->filled('semester')) {
+            $query->whereHas('classroom', function ($q) use ($request) {
+                $q->where('semester', $request->semester);
+            });
+        }
+
+        if ($request->filled('classroom_id')) {
+            $query->where('classroom_id', $request->classroom_id);
+        }
+
+        $achievements = $query->latest()->paginate(10);
+
+        // Filter daftar kelas yang ditampilkan di dropdown berdasarkan semester juga
+        $classroomsQuery = Classroom::orderBy('name');
+
+        if ($request->filled('semester')) {
+            $classroomsQuery->where('semester', $request->semester);
+        }
+
+        $classrooms = $classroomsQuery->get();
+
+        return view('achievements.index', [
+            'achievements' => $achievements,
+            'classrooms' => $classrooms,
+            'semester' => $request->semester,
+            'classroom_id' => $request->classroom_id,
+        ]);
     }
 
     /**
@@ -23,7 +52,8 @@ class AchievementController extends Controller
     public function create()
     {
         $students = Student::all();
-        return view('achievements.create', compact('students'));
+        $classrooms = Classroom::all();
+        return view('achievements.create', compact('students', 'classrooms'));
     }
 
     /**
@@ -33,6 +63,7 @@ class AchievementController extends Controller
     {
         $request->validate([
             'student_id' => 'required|exists:students,id',
+            'classroom_id' => 'required|exists:classrooms,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'level' => 'required|string',
@@ -50,7 +81,8 @@ class AchievementController extends Controller
     public function edit(Achievement $achievement)
     {
         $students = Student::all();
-        return view('achievements.edit', compact('achievement', 'students'));
+        $classrooms = Classroom::all();
+        return view('achievements.edit', compact('achievement', 'students', 'classrooms'));
     }
 
     /**
@@ -60,6 +92,7 @@ class AchievementController extends Controller
     {
         $request->validate([
             'student_id' => 'required|exists:students,id',
+            'classroom_id' => 'required|exists:classrooms,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'level' => 'required|string',

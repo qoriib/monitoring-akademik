@@ -12,33 +12,53 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <table class="table table-bordered table-hover">
-        <thead class="table-dark text-center">
-            <tr>
-                <th style="min-width: 15rem">Nama Kelas</th>
-                <th>Tahun Ajaran</th>
-                <th style="width: 8rem">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-        @forelse($classrooms as $classroom)
-            <tr>
-                <td>{{ $classroom->name }}</td>
-                <td class="font-monospace text-center">{{ $classroom->academic_year }}</td>
-                <td>
-                    <a href="{{ route('classrooms.edit', $classroom) }}" class="btn btn-warning btn-sm">Edit</a>
-                    <form action="{{ route('classrooms.destroy', $classroom) }}" method="POST" class="d-inline" onsubmit="return confirm('Hapus kelas ini?')">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-danger btn-sm">Hapus</button>
-                    </form>
-                </td>
-            </tr>
-        @empty
-            <tr><td colspan="3" class="text-center">Belum ada data kelas.</td></tr>
-        @endforelse
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>#</th>
+                    <th>Nama Kelas</th>
+                    <th>Tahun Ajaran</th>
+                    <th>Semester</th>
+                    <th>Jumlah Siswa</th>
+                    <th>Jumlah Mapel</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($classrooms as $i => $classroom)
+                    <tr>
+                        <td class="text-center">{{ $classrooms->firstItem() + $i }}</td>
+                        <td>{{ $classroom->name }}</td>
+                        <td>{{ $classroom->academic_year }}</td>
+                        <td>
+                            @if ($classroom->semester === 'Ganjil')
+                                <span class="badge bg-success">{{ $classroom->semester }}</span>
+                            @elseif ($classroom->semester === 'Genap')
+                                <span class="badge bg-primary">{{ $classroom->semester }}</span>
+                            @else
+                                <span class="badge bg-secondary">{{ $classroom->semester }}</span>
+                            @endif
+                        </td>
+                        <td>{{ $classroom->students->count() }}</td>
+                        <td>{{ $classroom->subjects->count() }}</td>
+                        <td>
+                            <a href="{{ route('classrooms.edit', $classroom) }}" class="btn btn-sm btn-warning">Edit</a>
+                            <form action="{{ route('classrooms.destroy', $classroom) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus kelas ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-danger">Hapus</button>
+                            </form>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">Belum ada data kelas.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
     {{ $classrooms->links() }}
 @endsection

@@ -14,23 +14,42 @@ class ClassroomSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Data kelas
-        $classroomData = [
-            ['name' => 'X IPA 1', 'academic_year' => '2024/2025'],
-            ['name' => 'X IPA 2', 'academic_year' => '2024/2025'],
-            ['name' => 'X IPS 1', 'academic_year' => '2024/2025'],
-        ];
+        $academicYear = '2024/2025';
+        $baseNames = ['X IPA', 'X IPS', 'XI IPA', 'XI IPS', 'XII IPA', 'XII IPS'];
+        $maxKelasPerBase = 3;
 
-        // 2. Buat kelas
-        foreach ($classroomData as $data) {
-            $classroom = Classroom::create($data);
+        $counterPerBase = [];
 
-            // 3. Ambil 3–5 siswa acak dan masukkan ke kelas
-            $students = Student::inRandomOrder()->take(rand(3, 5))->pluck('id');
+        // Total kelas yang akan dibuat
+        $totalClassrooms = 12;
+
+        for ($i = 0; $i < $totalClassrooms; $i++) {
+            // Ambil base nama secara urut
+            $baseName = $baseNames[$i % count($baseNames)];
+
+            // Hitung index per base
+            if (!isset($counterPerBase[$baseName])) {
+                $counterPerBase[$baseName] = 1;
+            }
+
+            $className = "$baseName {$counterPerBase[$baseName]}";
+            $counterPerBase[$baseName]++;
+
+            // Tetapkan semester: 1-6 Ganjil, sisanya Genap
+            $semester = $i < ($totalClassrooms / 2) ? 'Ganjil' : 'Genap';
+
+            $classroom = Classroom::create([
+                'name' => $className,
+                'academic_year' => $academicYear,
+                'semester' => $semester,
+            ]);
+
+            // Ambil 5–10 siswa acak
+            $students = Student::inRandomOrder()->take(rand(5, 10))->pluck('id');
             $classroom->students()->attach($students);
 
-            // 4. Ambil 2–4 mata pelajaran acak dan masukkan ke kelas
-            $subjects = Subject::inRandomOrder()->take(rand(2, 4))->pluck('id');
+            // Ambil 3–6 mata pelajaran acak
+            $subjects = Subject::inRandomOrder()->take(rand(3, 6))->pluck('id');
             $classroom->subjects()->attach($subjects);
         }
     }
