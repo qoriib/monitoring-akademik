@@ -28,10 +28,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/classrooms/{classroom}/subjects', [ClassroomController::class, 'updateSubjects'])->name('classrooms.subjects.update');
 
     Route::get('/scores', [ScoreController::class, 'index'])->name('scores.index');
-    Route::post('/scores', [ScoreController::class, 'store'])->name('scores.store');
+    Route::get('/scores/edit', [ScoreController::class, 'editForm'])->name('scores.edit-form');
+    Route::post('/scores/edit', [ScoreController::class, 'store'])->name('scores.store');
 
     Route::get('/attendances', [AttendanceController::class, 'index'])->name('attendances.index');
-    Route::post('/attendances', [AttendanceController::class, 'store'])->name('attendances.store');
+    Route::get('/attendances/edit', [AttendanceController::class, 'editForm'])->name('attendances.edit-form');
+    Route::post('/attendances/edit', [AttendanceController::class, 'store'])->name('attendances.store');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });

@@ -9,28 +9,47 @@ use Illuminate\Http\Request;
 class AttendanceController extends Controller
 {
     /**
-     * Tampilkan form absensi bulanan.
+     * Halaman rekap absensi bulanan.
      */
     public function index(Request $request)
     {
         $semester = $request->semester ?? 'Ganjil';
+        $month = $request->month ?? now()->format('Y-m');
 
-        $classrooms = \App\Models\Classroom::when($semester, fn($q) => $q->where('semester', $semester))
-            ->with('students')->get();
+        $classrooms = Classroom::where('semester', $semester)
+            ->with('students.attendances')->orderBy('name')->get();
 
         $classroomId = $request->classroom_id ?? $classrooms->first()?->id;
 
-        $month = $request->month ?? now()->format('Y-m');
-
-        $selectedClassroom = null;
-        $students = [];
-
-        if ($classroomId) {
-            $selectedClassroom = $classrooms->where('id', $classroomId)->first();
-            $students = $selectedClassroom?->students ?? [];
-        }
+        $selectedClassroom = $classrooms->firstWhere('id', $classroomId);
+        $students = $selectedClassroom?->students ?? [];
 
         return view('attendances.index', compact(
+            'classrooms',
+            'selectedClassroom',
+            'students',
+            'semester',
+            'month'
+        ));
+    }
+
+    /**
+     * Halaman input atau edit absensi bulanan.
+     */
+    public function editForm(Request $request)
+    {
+        $semester = $request->semester ?? 'Ganjil';
+        $month = $request->month ?? now()->format('Y-m');
+
+        $classrooms = Classroom::where('semester', $semester)
+            ->with('students.attendances')->orderBy('name')->get();
+
+        $classroomId = $request->classroom_id ?? $classrooms->first()?->id;
+
+        $selectedClassroom = $classrooms->firstWhere('id', $classroomId);
+        $students = $selectedClassroom?->students ?? [];
+
+        return view('attendances.edit', compact(
             'classrooms',
             'selectedClassroom',
             'students',
@@ -69,7 +88,7 @@ class AttendanceController extends Controller
         // Ambil semester dari kelas (agar tetap konsisten setelah submit)
         $semester = Classroom::find($request->classroom_id)?->semester ?? 'Ganjil';
 
-        return redirect()->route('attendances.index', [
+        return redirect()->route('attendances.edit-form', [
             'semester' => $semester,
             'classroom_id' => $request->classroom_id,
             'month' => $request->month,

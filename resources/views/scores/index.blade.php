@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Input Nilai')
+@section('title', 'Rekap Nilai Siswa')
 
 @section('content')
-    <h4 class="mb-4">Nilai Siswa</h4>
+    <h4 class="mb-4">Rekap Nilai Siswa</h4>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -33,51 +33,67 @@
                 @endforeach
             </select>
         </div>
+
+        @if($selectedClassroom)
+        <div class="col-md-4 d-flex align-items-end">
+            <a href="{{ route('scores.edit-form', ['classroom_id' => $selectedClassroom->id, 'semester' => $semester]) }}"
+               class="btn btn-warning w-100">
+                Edit / Input Nilai
+            </a>
+        </div>
+        @endif
     </form>
 
-    @if($selectedClassroom)
-        <form method="POST" action="{{ route('scores.store') }}">
-            @csrf
-            <input type="hidden" name="classroom_id" value="{{ $selectedClassroom->id }}">
-            <input type="hidden" name="semester" value="{{ $semester }}">
-
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="table-dark text-center">
-                        <tr>
-                            <th style="min-width: 15rem">Siswa</th>
-                            @foreach ($subjects as $subject)
-                                <th style="width: 10rem">{{ $subject->name }}</th>
-                            @endforeach
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($students as $student)
-                            <tr>
-                                <td>{{ $student->name }}</td>
-                                @foreach ($subjects as $subject)
-                                    @php
-                                        $existing = $student->scores
-                                            ->where('subject_id', $subject->id)
-                                            ->where('classroom_id', $selectedClassroom->id)
-                                            ->first();
-                                    @endphp
-                                    <td>
-                                        <input type="number" step="0.01" min="0" max="100"
-                                            name="scores[{{ $student->id }}][{{ $subject->id }}]"
-                                            class="form-control text-center"
-                                            value="{{ $existing->score ?? '' }}">
-                                    </td>
-                                @endforeach
-                            </tr>
+    {{-- Rekap Tabel Nilai --}}
+    @if($selectedClassroom && count($students) > 0 && count($subjects) > 0)
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th style="min-width: 15rem">Nama Siswa</th>
+                        @foreach ($subjects as $subject)
+                            <th style="min-width: 10rem;">{{ $subject->name }}</th>
                         @endforeach
-                    </tbody>
-                </table>
-            </div>
-
-            <button class="btn btn-primary mt-2">Simpan Nilai</button>
-        </form>
+                        <th style="min-width: 10rem;">Rata-rata</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($students as $student)
+                        <tr>
+                            <td>{{ $student->name }}</td>
+                            @php
+                                $total = 0;
+                                $count = 0;
+                            @endphp
+                            @foreach ($subjects as $subject)
+                                @php
+                                    $score = $student->scores
+                                        ->where('subject_id', $subject->id)
+                                        ->where('classroom_id', $selectedClassroom->id)
+                                        ->first();
+                                    $nilai = $score?->score ?? '-';
+                                    if (is_numeric($nilai)) {
+                                        $total += $nilai;
+                                        $count++;
+                                    }
+                                @endphp
+                                <td class="text-center">{{ is_numeric($nilai) ? number_format($nilai, 2) : '-' }}</td>
+                            @endforeach
+                            <td class="text-center fw-bold">
+                                {{ $count > 0 ? number_format($total / $count, 2) : '-' }}
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @elseif($selectedClassroom)
+        <div class="alert alert-warning">
+            Belum ada data siswa atau mata pelajaran pada kelas ini.
+        </div>
     @elseif($semester)
-        <div class="alert alert-warning">Silakan pilih kelas untuk semester <strong>{{ $semester }}</strong>.</div>
+        <div class="alert alert-warning">
+            Silakan pilih kelas untuk semester <strong>{{ $semester }}</strong>.
+        </div>
     @endif
 @endsection

@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Absensi Siswa')
+@section('title', 'Rekap Absensi Siswa')
 
 @section('content')
-    <h4 class="mb-4">Absensi Siswa</h4>
+    <h4 class="mb-4">Rekap Absensi Siswa</h4>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    {{-- Form Pilih Semester, Kelas & Bulan --}}
+    {{-- Filter Form --}}
     <form method="GET" action="{{ route('attendances.index') }}" class="row mb-4">
         <div class="col-md-3">
             <label for="semester" class="form-label">Semester</label>
@@ -44,72 +44,59 @@
         </div>
     </form>
 
-    {{-- Tabel Absensi --}}
+    {{-- Tabel Rekap --}}
     @if ($selectedClassroom && $month)
-        <form method="POST" action="{{ route('attendances.store') }}">
-            @csrf
-            <input type="hidden" name="classroom_id" value="{{ $selectedClassroom->id }}">
-            <input type="hidden" name="month" value="{{ $month }}">
+        @php
+            $daysInMonth = \Carbon\Carbon::parse($month)->daysInMonth;
+            $yearMonth = \Carbon\Carbon::parse($month)->format('Y-m');
+            $statusMap = [
+                'Hadir' => ['H', 'bg-success text-white'],
+                'Sakit' => ['S', 'bg-warning text-dark'],
+                'Izin'  => ['I', 'bg-info text-dark'],
+                'Alfa'  => ['A', 'bg-danger text-white'],
+            ];
+        @endphp
 
-            @php
-                $daysInMonth = \Carbon\Carbon::parse($month)->daysInMonth;
-                $yearMonth = \Carbon\Carbon::parse($month)->format('Y-m');
-                $statusOptions = ['Hadir', 'Sakit', 'Izin', 'Alfa'];
-            @endphp
-
-            <div class="table-responsive">
-                <table class="table table-bordered table-sm text-center">
-                    <thead class="table-dark">
+        <div class="table-responsive">
+            <table class="table table-bordered table-sm text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-start" style="min-width: 15rem">Nama Siswa</th>
+                        @for ($day = 1; $day <= $daysInMonth; $day++)
+                            <th style="min-width: 3rem;">{{ $day }}</th>
+                        @endfor
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($students as $student)
                         <tr>
-                            <th style="min-width: 15rem">Nama Siswa</th>
+                            <td class="text-start">{{ $student->name }}</td>
                             @for ($day = 1; $day <= $daysInMonth; $day++)
-                                <th>{{ $day }}</th>
+                                @php
+                                    $date = $yearMonth . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
+                                    $attendance = $student->attendances->firstWhere('date', $date);
+                                    [$abbr, $color] = $statusMap[$attendance->status ?? ''] ?? ['-', ''];
+                                @endphp
+                                <td class="{{ $color }}">{{ $abbr }}</td>
                             @endfor
                         </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($students as $student)
-                            <tr>
-                                <td class="text-start">{{ $student->name }}</td>
-                                @for ($day = 1; $day <= $daysInMonth; $day++)
-                                    @php
-                                        $date = $yearMonth . '-' . str_pad($day, 2, '0', STR_PAD_LEFT);
-                                        $existing = $student->attendances->where('date', $date)->first();
-                                    @endphp
-                                    <td>
-                                        @php
-                                            $statusClass = match($existing->status ?? null) {
-                                                'Hadir' => 'bg-success text-white',
-                                                'Sakit' => 'bg-warning text-dark',
-                                                'Izin'  => 'bg-info text-dark',
-                                                'Alfa'  => 'bg-danger text-white',
-                                                default => '',
-                                            };
-                                        @endphp
+                    @empty
+                        <tr>
+                            <td colspan="{{ $daysInMonth + 1 }}" class="text-center text-muted">
+                                Tidak ada data siswa pada kelas ini.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-                                        <select name="attendances[{{ $student->id }}][{{ $date }}]"
-                                                class="form-control form-control-sm text-center {{ $statusClass }}"
-                                                style="width: 4rem; margin: auto;">
-                                            <option value="">-</option>
-                                            @foreach ($statusOptions as $status)
-                                                <option value="{{ $status }}" {{ $existing && $existing->status === $status ? 'selected' : '' }}>
-                                                    {{ substr($status, 0, 1) }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                @endfor
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="{{ $daysInMonth + 1 }}" class="text-muted text-center">Tidak ada siswa dalam kelas ini.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <button class="btn btn-success mt-3">Simpan Absensi</button>
-        </form>
+        <a href="{{ route('attendances.edit-form', [
+            'semester' => $semester,
+            'classroom_id' => $selectedClassroom->id,
+            'month' => $month
+        ]) }}" class="btn btn-warning mt-3">
+            Edit Absensi
+        </a>
     @endif
 @endsection

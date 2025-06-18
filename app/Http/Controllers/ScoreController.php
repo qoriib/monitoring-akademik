@@ -9,26 +9,20 @@ use Illuminate\Http\Request;
 class ScoreController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Halaman rekap nilai
      */
     public function index(Request $request)
     {
         $classrooms = Classroom::orderByDesc('academic_year')->orderBy('name')->get();
-
-        // Default semester Ganjil jika tidak ada input
         $semester = $request->semester ?? 'Ganjil';
 
         $selectedClassroom = null;
         $students = [];
         $subjects = [];
 
-        // Jika classroom_id dikirim atau ada classroom default
         if ($request->filled('classroom_id')) {
             $selectedClassroom = Classroom::with(['students.scores', 'subjects'])
                 ->findOrFail($request->classroom_id);
-        } elseif ($classrooms->isNotEmpty()) {
-            $selectedClassroom = Classroom::with(['students.scores', 'subjects'])
-                ->first();
         }
 
         if ($selectedClassroom) {
@@ -46,7 +40,33 @@ class ScoreController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Halaman input/edit nilai
+     */
+    public function editForm(Request $request)
+    {
+        $semester = $request->semester ?? 'Ganjil';
+        $classroomId = $request->classroom_id;
+
+        if (!$classroomId) {
+            return redirect()->route('scores.index')->with('warning', 'Pilih kelas terlebih dahulu.');
+        }
+
+        $selectedClassroom = Classroom::with(['students.scores', 'subjects'])->findOrFail($classroomId);
+        $students = $selectedClassroom->students;
+        $subjects = $selectedClassroom->subjects;
+        $classrooms = Classroom::where('semester', $semester)->get();
+
+        return view('scores.edit', compact(
+            'selectedClassroom',
+            'students',
+            'subjects',
+            'semester',
+            'classrooms'
+        ));
+    }
+
+    /**
+     * Simpan nilai dari input/edit
      */
     public function store(Request $request)
     {
@@ -70,7 +90,9 @@ class ScoreController extends Controller
             }
         }
 
-        return redirect()->route('scores.index', ['classroom_id' => $request->classroom_id])
-            ->with('success', 'Nilai berhasil disimpan.');
+        return redirect()->route('scores.index', [
+            'semester' => $request->semester,
+            'classroom_id' => $request->classroom_id
+        ])->with('success', 'Nilai berhasil disimpan.');
     }
 }
