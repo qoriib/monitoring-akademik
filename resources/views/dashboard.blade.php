@@ -137,10 +137,10 @@
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-dark text-center">
                     <tr>
-                        <th>Kelas</th>
-                        <th>Nilai Tertinggi</th>
-                        <th>Kehadiran Terbanyak</th>
-                        <th>Prestasi Terbanyak</th>
+                        <th style="min-width: 10rem">Kelas</th>
+                        <th style="min-width: 15rem">Nilai Tertinggi</th>
+                        <th style="min-width: 15rem">Kehadiran Terbanyak</th>
+                        <th style="min-width: 15rem">Prestasi Terbanyak</th>
                     </tr>
                 </thead>
                 <tbody>
