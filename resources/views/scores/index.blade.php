@@ -46,10 +46,41 @@
 
     {{-- Rekap Tabel Nilai --}}
     @if($selectedClassroom && count($students) > 0 && count($subjects) > 0)
+        @php
+            // Hitung rata-rata dulu dan simpan ke array baru
+            $rankingData = [];
+
+            foreach ($students as $student) {
+                $total = 0;
+                $count = 0;
+                foreach ($subjects as $subject) {
+                    $score = $student->scores->where('subject_id', $subject->id)
+                        ->where('classroom_id', $selectedClassroom->id)
+                        ->first();
+                    if ($score) {
+                        $total += $score->score;
+                        $count++;
+                    }
+                }
+
+                $avg = $count > 0 ? $total / $count : null;
+
+                $rankingData[] = [
+                    'student' => $student,
+                    'scores' => $student->scores,
+                    'average' => $avg,
+                ];
+            }
+
+            // Urutkan berdasarkan rata-rata nilai
+            usort($rankingData, fn($a, $b) => ($b['average'] ?? 0) <=> ($a['average'] ?? 0));
+        @endphp
+
         <div class="table-responsive">
             <table class="table table-bordered align-middle">
                 <thead class="table-dark text-center">
                     <tr>
+                        <th>Rank</th>
                         <th style="min-width: 15rem">Nama Siswa</th>
                         @foreach ($subjects as $subject)
                             <th style="min-width: 10rem;">{{ $subject->name }}</th>
@@ -58,29 +89,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($students as $student)
+                    @foreach ($rankingData as $index => $data)
                         <tr>
-                            <td>{{ $student->name }}</td>
-                            @php
-                                $total = 0;
-                                $count = 0;
-                            @endphp
+                            <td class="text-center">{{ $data['average'] !== null ? $index + 1 : '-' }}</td>
+                            <td>{{ $data['student']->name }}</td>
                             @foreach ($subjects as $subject)
                                 @php
-                                    $score = $student->scores
+                                    $score = $data['scores']
                                         ->where('subject_id', $subject->id)
                                         ->where('classroom_id', $selectedClassroom->id)
                                         ->first();
                                     $nilai = $score?->score ?? '-';
-                                    if (is_numeric($nilai)) {
-                                        $total += $nilai;
-                                        $count++;
-                                    }
                                 @endphp
                                 <td class="text-center">{{ is_numeric($nilai) ? number_format($nilai, 2) : '-' }}</td>
                             @endforeach
                             <td class="text-center fw-bold">
-                                {{ $count > 0 ? number_format($total / $count, 2) : '-' }}
+                                {{ $data['average'] !== null ? number_format($data['average'], 2) : '-' }}
                             </td>
                         </tr>
                     @endforeach
